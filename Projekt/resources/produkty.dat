@@ -1,3 +1,4 @@
+ALKOHOL;
 Piwo jasne pszeniczne;
 Piwo jasne żytnie;
 Piwo ciemne;
@@ -17,6 +18,7 @@ Burbon;
 Absynt;
 Wódka;
 
+HIGIENA OSOBISTA;
 Mydło;
 Ręcznik;
 Szampon;
@@ -29,7 +31,7 @@ Ręcznik papierowy;
 Patyczki do uszu;
 Waciki kosmetyczne;
 Maseczka do twarzy;
-
+OWOCE I WARZYWA;
 Banan;
 Pomarańcza;
 Jabłko;
@@ -53,6 +55,7 @@ Groch;
 Wiśnia;
 Sałata;
 
+NARZĘDZIA;
 Śrubrokręt;
 Wkrętarka;
 Klucz francuski;
@@ -74,6 +77,7 @@ Nożyczki;
 Sekator;
 Latarka;
 
+ARTYKUŁY SPOŻYWCZE;
 Chleb;
 Szynka wieprzowa;
 Szynka z kurczaka;
@@ -97,6 +101,7 @@ Sok pomarańczowy;
 Nektar bananowy;
 Mięso mielone;
 
+RTV/AGD;
 Pralka;
 Zmywarka;
 Suszarka bębnowa;
@@ -115,6 +120,7 @@ Lodówka;
 Mikrofalówka;
 Płyta indukcyjna;
 
+ARTYKUŁY ZOOLOGICZNE;
 Karma dla małych psów;
 Karma sucha dla psów;
 Kawrma mokra dla psów;
@@ -137,6 +143,7 @@ Terrarium;
 Mata grzewcza;
 Akwarium;
 
+ARTYKUŁY MEDYCZNE;
 Apteczka pierwszej pomocy;
 Antykoncepcja;
 Leki na ból głowy;
@@ -157,6 +164,7 @@ Elektrolity;
 Igły;
 Strzykawka;
 
+ELEKTRONIKA KOMPUTEROWA;
 Ram;
 Dysk SSD;
 Dysk HDD;
@@ -174,16 +182,53 @@ Głośniki;
 Karta Graficzna;
 Płyta główna;
 
+ARTYKUŁY NIEMOWLĘCE;
 Pampersy;
 Oliwka dla dzieci;
 Chusteczki nawilżane;
 Laktator;
-Butelka dla dzieci;
-Smoczek;
+Butelka ze smoczkiem;
+Smoczek S;
+Smoczek M;
+Smoczek L;
 Jedzenie dla dzieci;
 Mleko w proszku od 1 miesiąca;
 Mleko w proszku od 6 miesiąca;
 Mleko w proszku od 12 miesiąca;
+
+UBRANIA;
+Koszulka;
+Bluza;
+Bezrękawnik;
+Rękawiczki;
+Czapka;
+Kapelusz;
+Cylinder;
+Komin;
+Szalik;
+Kominiarka;
+Płaszcz;
+Futro;
+Kamizelka;
+Garnitur;
+Kurtka dżinsowa;
+Pasek;
+Dżinsy;
+Spodnie dresowe;
+Spodnie sztruksowe;
+Leginsy;
+Rajstopy;
+Kalesony;
+Pokolanówki;
+Majtki;
+Bokserki;
+Spodenki;
+Skarpety;
+Kozaki;
+Adidasy;
+Sandały;
+Kombinezon;
+Kalosze;
 
 
 
