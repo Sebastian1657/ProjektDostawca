@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.Random;
 
 class Kierowca {
-    int x = 0;
-    int y = 0;
+    int x;
+    int y;
     int speed = 32;
     ArrayList<ArrayList<String>> pakaKierowca = new ArrayList<>();
     public Kierowca(int x, int y) {
@@ -18,6 +18,7 @@ class Kierowca {
         this.y = y;
     }
 }
+@SuppressWarnings("ALL")
 class Sklep{
     int x;
     int y;
@@ -37,6 +38,180 @@ class Sklep{
         kategorie.remove(index);
     }
 }
+class SklepUI{
+    public static void otworzSklep(Sklep sklep, Kierowca gracz, JFrame parentFrame) {
+        JFrame sklepOkno = new JFrame("Sklep");
+        sklepOkno.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        sklepOkno.setSize(800, 600);
+        sklepOkno.setLayout(new BorderLayout());
+        sklepOkno.setResizable(false);
+
+        //Tworzenie paneli sklepu i ekwipunku
+        JPanel sklepLista = new JPanel();
+        JPanel pakaLista = new JPanel();
+        sklepLista.setLayout(new BoxLayout(sklepLista, BoxLayout.Y_AXIS));
+        pakaLista.setLayout(new BoxLayout(pakaLista, BoxLayout.Y_AXIS));
+        //Dodawanie elementów sklepu do panelu
+        for (ArrayList<String> kategoria : sklep.inwentarzSklep) {
+            String nazwaKategorii = kategoria.getFirst();
+            for (int i = 1; i < kategoria.size(); i++) {
+                String przedmiot = kategoria.get(i);
+                JCheckBox checkBox = new JCheckBox(nazwaKategorii + ": " + przedmiot);
+                sklepLista.add(checkBox);
+            }
+        }
+        //Dodawanie elementów ekwipunku gracza do panelu
+        for (ArrayList<String> kategoria : gracz.pakaKierowca) {
+            String nazwaKategorii = kategoria.getFirst();
+            for (int i = 1; i < kategoria.size(); i++) {
+                String przedmiot = kategoria.get(i);
+                JCheckBox checkBox = new JCheckBox(nazwaKategorii + ": " + przedmiot);
+                pakaLista.add(checkBox);
+            }
+        }
+        //Zastąpienie pustego panelu placeholderem, jeśli brak elementów
+        if (pakaLista.getComponentCount() == 0) {
+            JLabel placeholder = new JLabel("Ekwipunek pusty");
+            pakaLista.add(placeholder);
+        }
+        if (sklepLista.getComponentCount() == 0) {
+            JLabel placeholder = new JLabel("Sklep pusty");
+            sklepLista.add(placeholder);
+        }
+        //Dodanie pasków przewijania dla sklepu i ekwipunku
+        JScrollPane scrollSklep = new JScrollPane(sklepLista);
+        JScrollPane scrollEkwipunek = new JScrollPane(pakaLista);
+        //Tworzenie panelu przycisków
+        JPanel przyciskiPanel = new JPanel();
+        przyciskiPanel.setLayout(new BoxLayout(przyciskiPanel, BoxLayout.Y_AXIS));
+        przyciskiPanel.add(Box.createVerticalGlue());
+        //Tworzenie przycisków
+        JButton przeniesDoEkwipunku = new JButton("→");
+        JButton przeniesDoSklepu = new JButton("←");
+        JButton zatwierdz = new JButton("Zatwierdź");
+        //Stylowanie przycisków
+        Dimension rozmiar = new Dimension(100, 30);
+        przeniesDoEkwipunku.setMaximumSize(rozmiar);
+        przeniesDoEkwipunku.setFont(new Font("Arial", Font.PLAIN, 16));
+
+        przeniesDoSklepu.setMaximumSize(rozmiar);
+        przeniesDoSklepu.setFont(new Font("Arial", Font.PLAIN, 16));
+
+        zatwierdz.setMaximumSize(rozmiar);
+        zatwierdz.setFont(new Font("Arial", Font.PLAIN, 12));
+        // Obsługa przenoszenia elementów do ekwipunku gracza
+        przeniesDoEkwipunku.addActionListener(e -> {
+            Component[] checkBoxy = sklepLista.getComponents();
+            for (Component komponent : checkBoxy) {
+                if (pakaLista.getComponent(0) instanceof JLabel) {
+                    pakaLista.remove(0);
+                }
+                if (komponent instanceof JCheckBox checkBox && checkBox.isSelected()) {
+                    sklepLista.remove(checkBox);
+                    pakaLista.add(checkBox);
+                    checkBox.setSelected(false);
+                }
+                if (sklepLista.getComponentCount() == 0) {
+                    JLabel placeholder = new JLabel("Sklep pusty");
+                    sklepLista.add(placeholder);
+                }
+            }
+            sklepLista.revalidate();
+            sklepLista.repaint();
+            pakaLista.revalidate();
+            pakaLista.repaint();
+        });
+        //Obsługa przenoszenia elementów do magazynu
+        przeniesDoSklepu.addActionListener(e -> {
+            Component[] checkBoxy = pakaLista.getComponents();
+            for (Component komponent : checkBoxy) {
+                if (sklepLista.getComponent(0) instanceof JLabel) {
+                    sklepLista.remove(0);
+                }
+                if (komponent instanceof JCheckBox checkBox && checkBox.isSelected()) {
+                    pakaLista.remove(checkBox);
+                    sklepLista.add(checkBox);
+                    checkBox.setSelected(false);
+                }
+                if (pakaLista.getComponentCount() == 0) {
+                    JLabel placeholder = new JLabel("Ekwipunek pusty");
+                    pakaLista.add(placeholder);
+                }
+            }
+            sklepLista.revalidate();
+            sklepLista.repaint();
+            pakaLista.revalidate();
+            pakaLista.repaint();
+        });
+        //Zatwierdzanie zmian w magazynie i ekwipunku
+        zatwierdz.addActionListener(e -> {
+            sklep.inwentarzSklep.clear();
+            for (Component komponent : sklepLista.getComponents()) {
+                if (komponent instanceof JCheckBox checkBox) {
+                    String item = checkBox.getText();
+                    String kategoria = item.split(":")[0].trim();
+                    String przedmiot = item.split(":")[1].trim();
+                    boolean dodano = false;
+                    for (ArrayList<String> kategoriaLista : sklep.inwentarzSklep) {
+                        if (kategoriaLista.getFirst().equals(kategoria)) {
+                            kategoriaLista.add(przedmiot);
+                            dodano = true;
+                            break;
+                        }
+                    }
+                    if (!dodano) {
+                        ArrayList<String> nowaKategoria = new ArrayList<>();
+                        nowaKategoria.add(kategoria);
+                        nowaKategoria.add(przedmiot);
+                        sklep.inwentarzSklep.add(nowaKategoria);
+                    }
+                }
+            }
+            gracz.pakaKierowca.clear();
+            for (Component komponent : pakaLista.getComponents()) {
+                if (komponent instanceof JCheckBox checkBox) {
+                    String item = checkBox.getText();
+                    String kategoria = item.split(":")[0].trim();
+                    String przedmiot = item.split(":")[1].trim();
+
+                    boolean dodano = false;
+                    for (ArrayList<String> kategoriaLista : gracz.pakaKierowca) {
+                        if (kategoriaLista.getFirst().equals(kategoria)) {
+                            kategoriaLista.add(przedmiot);
+                            dodano = true;
+                            break;
+                        }
+                    }
+                    if (!dodano) {
+                        ArrayList<String> nowaKategoria = new ArrayList<>();
+                        nowaKategoria.add(kategoria);
+                        nowaKategoria.add(przedmiot);
+                        gracz.pakaKierowca.add(nowaKategoria);
+                    }
+                }
+            }
+            sklepOkno.dispose();
+        });
+        //Dodanie przycisków do panelu
+        przyciskiPanel.add(przeniesDoEkwipunku);
+        przyciskiPanel.add(przeniesDoSklepu);
+        przyciskiPanel.add(zatwierdz);
+        przyciskiPanel.add(Box.createVerticalGlue());
+
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
+        scrollSklep.setPreferredSize(new Dimension(100, 200));
+        mainPanel.add(scrollSklep);
+        przyciskiPanel.setPreferredSize(new Dimension(100, 200));
+        mainPanel.add(przyciskiPanel);
+        scrollEkwipunek.setPreferredSize(new Dimension(100, 200));
+        mainPanel.add(scrollEkwipunek);
+
+        sklepOkno.add(mainPanel);
+        sklepOkno.setLocationRelativeTo(parentFrame);
+        sklepOkno.setVisible(true);
+    }
+}
 class Magazyn{
     int x;
     int y;
@@ -44,7 +219,7 @@ class Magazyn{
     public Magazyn(int x, int y) {
         this.x = x;
         this.y = y;
-    };
+    }
     public boolean isOnMagazyn(Kierowca kierowca) {
         return kierowca.x == this.x && kierowca.y == this.y;
     }
@@ -60,6 +235,183 @@ class Magazyn{
                 wszystkieProdukty.get(i).remove(randIndex);
             }
         }
+    }
+}
+class MagazynUI {
+    public static void otworzMagazyn(Magazyn magazyn, Kierowca gracz, JFrame parentFrame) {
+        JFrame magazynOkno = new JFrame("Magazyn");
+        magazynOkno.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        magazynOkno.setSize(800, 600);
+        magazynOkno.setLayout(new BorderLayout());
+        magazynOkno.setResizable(false);
+
+        //Tworzenie paneli magazynu i ekwipunku
+        JPanel magazynLista = new JPanel();
+        JPanel pakaLista = new JPanel();
+        magazynLista.setLayout(new BoxLayout(magazynLista, BoxLayout.Y_AXIS));
+        pakaLista.setLayout(new BoxLayout(pakaLista, BoxLayout.Y_AXIS));
+
+        //Dodawanie elementów magazynu do panelu
+        for (ArrayList<String> kategoria : magazyn.inwentarzMagazyn) {
+            String nazwaKategorii = kategoria.getFirst();
+            for (int i = 1; i < kategoria.size(); i++) {
+                String przedmiot = kategoria.get(i);
+                JCheckBox checkBox = new JCheckBox(nazwaKategorii + ": " + przedmiot);
+                magazynLista.add(checkBox);
+            }
+        }
+        //Dodawanie elementów ekwipunku gracza do panelu
+        for (ArrayList<String> kategoria : gracz.pakaKierowca) {
+            String nazwaKategorii = kategoria.getFirst();
+            for (int i = 1; i < kategoria.size(); i++) {
+                String przedmiot = kategoria.get(i);
+                JCheckBox checkBox = new JCheckBox(nazwaKategorii + ": " + przedmiot);
+                pakaLista.add(checkBox);
+            }
+        }
+        //Zastąpienie pustego panelu placeholderem, jeśli brak elementów
+        if (pakaLista.getComponentCount() == 0) {
+            JLabel placeholder = new JLabel("Ekwipunek pusty");
+            pakaLista.add(placeholder);
+        }
+        if (magazynLista.getComponentCount() == 0) {
+            JLabel placeholder = new JLabel("Magazyn pusty");
+            magazynLista.add(placeholder);
+        }
+        //Dodanie pasków przewijania dla magazynu i ekwipunku
+        JScrollPane scrollMagazyn = new JScrollPane(magazynLista);
+        JScrollPane scrollEkwipunek = new JScrollPane(pakaLista);
+        //Tworzenie panelu przycisków
+        JPanel przyciskiPanel = new JPanel();
+        przyciskiPanel.setLayout(new BoxLayout(przyciskiPanel, BoxLayout.Y_AXIS));
+        przyciskiPanel.add(Box.createVerticalGlue());
+        //Tworzenie przycisków
+        JButton przeniesDoEkwipunku = new JButton("→");
+        JButton przeniesDoMagazynu = new JButton("←");
+        JButton zatwierdz = new JButton("Zatwierdź");
+        //Stylowanie przycisków
+        Dimension rozmiar = new Dimension(100, 30);
+        przeniesDoEkwipunku.setMaximumSize(rozmiar);
+        przeniesDoEkwipunku.setFont(new Font("Arial", Font.PLAIN, 16));
+
+        przeniesDoMagazynu.setMaximumSize(rozmiar);
+        przeniesDoMagazynu.setFont(new Font("Arial", Font.PLAIN, 16));
+
+        zatwierdz.setMaximumSize(rozmiar);
+        zatwierdz.setFont(new Font("Arial", Font.PLAIN, 12));
+
+        // Obsługa przenoszenia elementów do ekwipunku gracza
+        przeniesDoEkwipunku.addActionListener(e -> {
+            Component[] checkBoxy = magazynLista.getComponents();
+            for (Component komponent : checkBoxy) {
+                if (pakaLista.getComponent(0) instanceof JLabel) {
+                    pakaLista.remove(0);
+                }
+                if (komponent instanceof JCheckBox checkBox && checkBox.isSelected()) {
+                    magazynLista.remove(checkBox);
+                    pakaLista.add(checkBox);
+                    checkBox.setSelected(false);
+                }
+                if (magazynLista.getComponentCount() == 0) {
+                    JLabel placeholder = new JLabel("Magazyn pusty");
+                    magazynLista.add(placeholder);
+                }
+            }
+            magazynLista.revalidate();
+            magazynLista.repaint();
+            pakaLista.revalidate();
+            pakaLista.repaint();
+        });
+        //Obsługa przenoszenia elementów do magazynu
+        przeniesDoMagazynu.addActionListener(e -> {
+            Component[] checkBoxy = pakaLista.getComponents();
+            for (Component komponent : checkBoxy) {
+                if (magazynLista.getComponent(0) instanceof JLabel) {
+                    magazynLista.remove(0);
+                }
+                if (komponent instanceof JCheckBox checkBox && checkBox.isSelected()) {
+                    pakaLista.remove(checkBox);
+                    magazynLista.add(checkBox);
+                    checkBox.setSelected(false);
+                }
+                if (pakaLista.getComponentCount() == 0) {
+                    JLabel placeholder = new JLabel("Ekwipunek pusty");
+                    pakaLista.add(placeholder);
+                }
+            }
+            magazynLista.revalidate();
+            magazynLista.repaint();
+            pakaLista.revalidate();
+            pakaLista.repaint();
+        });
+        //Zatwierdzanie zmian w magazynie i ekwipunku
+        zatwierdz.addActionListener(e -> {
+            magazyn.inwentarzMagazyn.clear();
+            for (Component komponent : magazynLista.getComponents()) {
+                if (komponent instanceof JCheckBox checkBox) {
+                    String item = checkBox.getText();
+                    String kategoria = item.split(":")[0].trim();
+                    String przedmiot = item.split(":")[1].trim();
+                    boolean dodano = false;
+                    for (ArrayList<String> kategoriaLista : magazyn.inwentarzMagazyn) {
+                        if (kategoriaLista.getFirst().equals(kategoria)) {
+                            kategoriaLista.add(przedmiot);
+                            dodano = true;
+                            break;
+                        }
+                    }
+                    if (!dodano) {
+                        ArrayList<String> nowaKategoria = new ArrayList<>();
+                        nowaKategoria.add(kategoria);
+                        nowaKategoria.add(przedmiot);
+                        magazyn.inwentarzMagazyn.add(nowaKategoria);
+                    }
+                }
+            }
+
+            gracz.pakaKierowca.clear();
+            for (Component komponent : pakaLista.getComponents()) {
+                if (komponent instanceof JCheckBox checkBox) {
+                    String item = checkBox.getText();
+                    String kategoria = item.split(":")[0].trim();
+                    String przedmiot = item.split(":")[1].trim();
+
+                    boolean dodano = false;
+                    for (ArrayList<String> kategoriaLista : gracz.pakaKierowca) {
+                        if (kategoriaLista.getFirst().equals(kategoria)) {
+                            kategoriaLista.add(przedmiot);
+                            dodano = true;
+                            break;
+                        }
+                    }
+                    if (!dodano) {
+                        ArrayList<String> nowaKategoria = new ArrayList<>();
+                        nowaKategoria.add(kategoria);
+                        nowaKategoria.add(przedmiot);
+                        gracz.pakaKierowca.add(nowaKategoria);
+                    }
+                }
+            }
+            magazynOkno.dispose();
+        });
+        //Dodanie przycisków do panelu
+        przyciskiPanel.add(przeniesDoEkwipunku);
+        przyciskiPanel.add(przeniesDoMagazynu);
+        przyciskiPanel.add(zatwierdz);
+        przyciskiPanel.add(Box.createVerticalGlue());
+
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
+        scrollMagazyn.setPreferredSize(new Dimension(100, 200));
+        mainPanel.add(scrollMagazyn);
+        przyciskiPanel.setPreferredSize(new Dimension(100, 200));
+        mainPanel.add(przyciskiPanel);
+        scrollEkwipunek.setPreferredSize(new Dimension(100, 200));
+        mainPanel.add(scrollEkwipunek);
+
+        magazynOkno.add(mainPanel);
+        magazynOkno.setLocationRelativeTo(parentFrame);
+        magazynOkno.setVisible(true);
     }
 }
 class Init{
@@ -150,11 +502,6 @@ public class Main {
         Kierowca gracz1 = Init.getGracz();
         Sklep[] sklepy = Init.getSklepy();
 
-        System.out.println(magazyn.inwentarzMagazyn.get(0).get(0));
-        System.out.println(magazyn.inwentarzMagazyn.get(0).get(1));
-        System.out.println(magazyn.inwentarzMagazyn.get(1).get(0));
-        System.out.println(magazyn.inwentarzMagazyn.get(1).get(1));
-
         Image mapa = new ImageIcon("Projekt/resources/map.png").getImage();
         Image pojazd = new ImageIcon("Projekt/resources/kierowcaTestowy.png").getImage();
 
@@ -212,19 +559,37 @@ public class Main {
                     case KeyEvent.VK_SPACE -> {
                         boolean onSklep = false;
                         boolean onMagazyn = false;
+                        Sklep currentSklep = null;
+                        Magazyn currentMagazyn = null;
                         for(Sklep sklep: sklepy){
-                            if(sklep.isOnSklep(gracz1))onSklep = true;
+                            if(sklep.isOnSklep(gracz1)){
+                                currentSklep = sklep;
+                                onSklep = true;
+                            }
                         }
-                        if (magazyn.isOnMagazyn(gracz1))onMagazyn = true;
+                        if (magazyn.isOnMagazyn(gracz1)){
+                            currentMagazyn = magazyn;
+                            onMagazyn = true;
+                        }
                         if(onSklep){
                             System.out.println("Jesteś w sklepie");
-                            SklepOkno.setLocationRelativeTo(MainOkno);
-                            SklepOkno.setVisible(true);
+                            SklepUI.otworzSklep(currentSklep,gracz1,MainOkno);
                         }
                         if(onMagazyn){
                             System.out.println("Jesteś w magazynie");
-                            MagazynOkno.setLocationRelativeTo(MainOkno);
-                            MagazynOkno.setVisible(true);
+                            MagazynUI.otworzMagazyn(magazyn, gracz1, MainOkno);
+                            System.out.println("ZAWARTOSC MAGAZYNU:");
+                            for(ArrayList<String> kategoria: magazyn.inwentarzMagazyn){
+                                for (String s : kategoria) {
+                                    System.out.println(s);
+                                }
+                            }
+                            System.out.println("PAKA GRACZA:");
+                            for(ArrayList<String> kategoria: gracz1.pakaKierowca){
+                                for (String s : kategoria) {
+                                    System.out.println(s);
+                                }
+                            }
                         }
                     }
                 }
