@@ -8,6 +8,29 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
+class Timer{
+    boolean isRunning = false;
+    long czasStartu;
+    long minelo;
+    long mineloSekund;
+    int sekundy;
+    int mineloMinut;
+    public void start() {
+        if(this.isRunning)return;
+        this.czasStartu = System.currentTimeMillis();
+        this.isRunning = true;
+    }
+    public int[] stop() {
+        this.minelo = System.currentTimeMillis() - this.czasStartu;
+        this.mineloSekund = minelo / 1000;
+        this.sekundy = (int)mineloSekund % 60;
+        this.mineloMinut = (int)mineloSekund / 60;
+        if(mineloMinut < 1){
+            this.mineloMinut = 0;
+        }
+        return new int[]{mineloMinut, sekundy};
+    }
+}
 class Kierowca {
     int x;
     int y;
@@ -18,7 +41,6 @@ class Kierowca {
         this.y = y;
     }
 }
-@SuppressWarnings("ALL")
 class Sklep{
     int x;
     int y;
@@ -40,17 +62,45 @@ class Sklep{
 }
 class SklepUI{
     public static void otworzSklep(Sklep sklep, Kierowca gracz, JFrame parentFrame) {
+        //Okno oraz panele sklepu i ekwipunku
         JFrame sklepOkno = new JFrame("Sklep");
+        JPanel sklepLista = new JPanel();
+        JPanel pakaLista = new JPanel();
+        //paski przewijania dla sklepu i ekwipunku
+        JScrollPane scrollSklep = new JScrollPane(sklepLista);
+        JScrollPane scrollEkwipunek = new JScrollPane(pakaLista);
+        //etykiety z zapotrzebowaniem dla sklepów
+        JLabel zapotrzebowanieLabel = new JLabel();
+        //panel przycisków oraz same przyciski
+        JPanel przyciskiPanel = new JPanel();
+        JButton przeniesDoEkwipunku = new JButton("→");
+        JButton przeniesDoSklepu = new JButton("←");
+        JButton zatwierdz = new JButton("Zatwierdź");
+        //Konfiguracja elementów
         sklepOkno.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         sklepOkno.setSize(800, 600);
         sklepOkno.setLayout(new BorderLayout());
         sklepOkno.setResizable(false);
-
-        //Tworzenie paneli sklepu i ekwipunku
-        JPanel sklepLista = new JPanel();
-        JPanel pakaLista = new JPanel();
         sklepLista.setLayout(new BoxLayout(sklepLista, BoxLayout.Y_AXIS));
         pakaLista.setLayout(new BoxLayout(pakaLista, BoxLayout.Y_AXIS));
+        przyciskiPanel.setLayout(new BoxLayout(przyciskiPanel, BoxLayout.Y_AXIS));
+        przyciskiPanel.add(Box.createVerticalGlue());
+        //Stylowanie przycisków
+        Dimension rozmiar = new Dimension(100, 30);
+        przeniesDoEkwipunku.setMaximumSize(rozmiar);
+        przeniesDoEkwipunku.setFont(new Font("Arial", Font.PLAIN, 16));
+        przeniesDoSklepu.setMaximumSize(rozmiar);
+        przeniesDoSklepu.setFont(new Font("Arial", Font.PLAIN, 16));
+        zatwierdz.setMaximumSize(rozmiar);
+        zatwierdz.setFont(new Font("Arial", Font.PLAIN, 12));
+        //Dodanie przycisków do panelu
+        przyciskiPanel.add(przeniesDoEkwipunku);
+        przyciskiPanel.add(przeniesDoSklepu);
+        przyciskiPanel.add(zatwierdz);
+        przyciskiPanel.add(Box.createVerticalGlue());
+        //konfiguracja etykiety
+        zapotrzebowanieLabel.setText(sklep.zapotrzebowanie);
+        zapotrzebowanieLabel.setHorizontalAlignment(JLabel.CENTER);
         //Dodawanie elementów sklepu do panelu
         for (ArrayList<String> kategoria : sklep.inwentarzSklep) {
             String nazwaKategorii = kategoria.getFirst();
@@ -78,32 +128,12 @@ class SklepUI{
             JLabel placeholder = new JLabel("Sklep pusty");
             sklepLista.add(placeholder);
         }
-        //Dodanie pasków przewijania dla sklepu i ekwipunku
-        JScrollPane scrollSklep = new JScrollPane(sklepLista);
-        JScrollPane scrollEkwipunek = new JScrollPane(pakaLista);
-        //Tworzenie panelu przycisków
-        JPanel przyciskiPanel = new JPanel();
-        przyciskiPanel.setLayout(new BoxLayout(przyciskiPanel, BoxLayout.Y_AXIS));
-        przyciskiPanel.add(Box.createVerticalGlue());
-        //Tworzenie przycisków
-        JButton przeniesDoEkwipunku = new JButton("→");
-        JButton przeniesDoSklepu = new JButton("←");
-        JButton zatwierdz = new JButton("Zatwierdź");
-        //Stylowanie przycisków
-        Dimension rozmiar = new Dimension(100, 30);
-        przeniesDoEkwipunku.setMaximumSize(rozmiar);
-        przeniesDoEkwipunku.setFont(new Font("Arial", Font.PLAIN, 16));
 
-        przeniesDoSklepu.setMaximumSize(rozmiar);
-        przeniesDoSklepu.setFont(new Font("Arial", Font.PLAIN, 16));
-
-        zatwierdz.setMaximumSize(rozmiar);
-        zatwierdz.setFont(new Font("Arial", Font.PLAIN, 12));
         // Obsługa przenoszenia elementów do ekwipunku gracza
         przeniesDoEkwipunku.addActionListener(e -> {
             Component[] checkBoxy = sklepLista.getComponents();
             for (Component komponent : checkBoxy) {
-                if (pakaLista.getComponent(0) instanceof JLabel) {
+                if (pakaLista.getComponentCount() > 0 && pakaLista.getComponent(0) instanceof JLabel) {
                     pakaLista.remove(0);
                 }
                 if (komponent instanceof JCheckBox checkBox && checkBox.isSelected()) {
@@ -125,7 +155,7 @@ class SklepUI{
         przeniesDoSklepu.addActionListener(e -> {
             Component[] checkBoxy = pakaLista.getComponents();
             for (Component komponent : checkBoxy) {
-                if (sklepLista.getComponent(0) instanceof JLabel) {
+                if (sklepLista.getComponentCount() > 0 && sklepLista.getComponent(0) instanceof JLabel) {
                     sklepLista.remove(0);
                 }
                 if (komponent instanceof JCheckBox checkBox && checkBox.isSelected()) {
@@ -192,12 +222,7 @@ class SklepUI{
             }
             sklepOkno.dispose();
         });
-        //Dodanie przycisków do panelu
-        przyciskiPanel.add(przeniesDoEkwipunku);
-        przyciskiPanel.add(przeniesDoSklepu);
-        przyciskiPanel.add(zatwierdz);
-        przyciskiPanel.add(Box.createVerticalGlue());
-
+        sklepOkno.add(zapotrzebowanieLabel, BorderLayout.NORTH);
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
         scrollSklep.setPreferredSize(new Dimension(100, 200));
@@ -239,6 +264,7 @@ class Magazyn{
 }
 class MagazynUI {
     public static void otworzMagazyn(Magazyn magazyn, Kierowca gracz, JFrame parentFrame) {
+        Init.timer.start();
         JFrame magazynOkno = new JFrame("Magazyn");
         magazynOkno.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         magazynOkno.setSize(800, 600);
@@ -304,7 +330,7 @@ class MagazynUI {
         przeniesDoEkwipunku.addActionListener(e -> {
             Component[] checkBoxy = magazynLista.getComponents();
             for (Component komponent : checkBoxy) {
-                if (pakaLista.getComponent(0) instanceof JLabel) {
+                if (pakaLista.getComponentCount() > 0 && pakaLista.getComponent(0) instanceof JLabel) {
                     pakaLista.remove(0);
                 }
                 if (komponent instanceof JCheckBox checkBox && checkBox.isSelected()) {
@@ -326,7 +352,7 @@ class MagazynUI {
         przeniesDoMagazynu.addActionListener(e -> {
             Component[] checkBoxy = pakaLista.getComponents();
             for (Component komponent : checkBoxy) {
-                if (magazynLista.getComponent(0) instanceof JLabel) {
+                if (magazynLista.getComponentCount() > 0 && magazynLista.getComponent(0) instanceof JLabel) {
                     magazynLista.remove(0);
                 }
                 if (komponent instanceof JCheckBox checkBox && checkBox.isSelected()) {
@@ -414,8 +440,98 @@ class MagazynUI {
         magazynOkno.setVisible(true);
     }
 }
+class EndGame{
+    public static void Zakoncz(JFrame parentFrame, Sklep[] sklepy, Kierowca gracz){
+        int przyciskYesNo = JOptionPane.YES_NO_OPTION;
+        int odpowiedz = JOptionPane.showConfirmDialog(parentFrame, "Czy chcesz zakończyć grę?", "Koniec gry", przyciskYesNo);
+        int wynik = 0;
+        if(odpowiedz == 0 && gracz.pakaKierowca.isEmpty()) {
+            int[] czas = new int[2];
+            for(Sklep sklep: sklepy){
+                int poprawny = 0;
+                for(ArrayList<String> kategoria : sklep.inwentarzSklep){
+                    if(kategoria.getFirst().equals(sklep.zapotrzebowanie)){
+                        for(int i = 1; i < kategoria.size(); i++){
+                            poprawny++;
+                        }
+                    }
+                }
+                if(poprawny == 10)wynik++;
+            }
+            czas = Init.timer.stop();
+            String rezultat="";
+            if(wynik==0)rezultat="Oj słabo, słabo,...\nZawiodłeś swoich klientów i zostałeś zwolniony w "+czas[0]+" minut i "+czas[1]+" sekund";
+            if(wynik>0)rezultat="Mogło pójść lepiej...\nPoprawnie dostarczyłeś towary do "+wynik+" na "+ sklepy.length+" sklepach w "+czas[0]+" minut i "+czas[1]+" sekund!";
+            if(wynik==5)rezultat="Brawo!\nPoprawnie dostarczyłeś towary do wszystkich sklepów w "+czas[0]+" minut i "+czas[1]+" sekund!";
+
+            int e = JOptionPane.showOptionDialog(parentFrame,
+                    rezultat,
+                    "Wynik końcowy",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE,
+                    null,
+                    new Object[]{"Zamknij"},
+                    "Zamknij"
+                    );
+            if(e==0)System.exit(0);
+        }else if(!gracz.pakaKierowca.isEmpty()){
+            JOptionPane.showMessageDialog(parentFrame,"Aby poznać wynik końcowy opróżnij pojazd!","Opróżnij pakę!",JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}
+class Rules{
+    public static void Zasady(JFrame parentFrame){
+        JFrame oknoZasady = new JFrame("Zasady");
+        JLabel tytul = new JLabel("ZASADY GRY:");
+        JTextArea opis = new JTextArea(
+                        "\n" +
+                        "    Twoim zadaniem jest rozwieźć przedmioty z magazynu\n" +
+                        "    do sklepów według zapotrzebowania.\n" +
+                        "    W każdym sklepie powinno znaleźć się 10 przedmiotów\n" +
+                        "    z kategorii widocznej na górze okna otwartego sklepu.\n" +
+                        "    Aby sprawdzić jak Ci poszło musisz mieć pusty pojazd\n" +
+                        "    i nacisnąć ESC."
+        );
+        JTextArea poruszanie = new JTextArea(
+                "    Poruszanie: \n" +
+                "    ↑ - jedź w górę\n" +
+                "    ← - jedź w lewo\n" +
+                "    → - jedź w prawo\n" +
+                "    ↓ - jedź w dół\n" +
+                "    spacja - interakcja\n" +
+                "    ESC - sprawdzenie wyniku"
+        );
+
+        tytul.setFont(new Font("Sans", Font.BOLD, 24));
+        tytul.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        opis.setFont(new Font("Sans", Font.PLAIN, 20));
+        opis.setLineWrap(true);
+        opis.setEditable(false);
+
+        poruszanie.setFont(new Font("Sans", Font.PLAIN, 20));
+        poruszanie.setAlignmentX(Component.CENTER_ALIGNMENT);
+        poruszanie.setLayout(new BoxLayout(poruszanie, BoxLayout.Y_AXIS));
+        poruszanie.setEditable(false);
+
+        oknoZasady.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        oknoZasady.setSize(600, 500);
+        oknoZasady.setLayout(new BorderLayout());
+        oknoZasady.setResizable(false);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.add(tytul);
+        panel.add(opis);
+        panel.add(poruszanie);
+        oknoZasady.add(panel);
+        oknoZasady.setLocationRelativeTo(parentFrame);
+        oknoZasady.setVisible(true);
+    }
+}
 class Init{
     static String sciezka = "Projekt/resources/produkty.dat";
+    static Timer timer;
     private static Sklep[] sklepy;
     private static Magazyn magazyn;
     private static Kierowca gracz;
@@ -460,6 +576,7 @@ class Init{
         }
     }
     public static void inicjujObiektyGry() {
+        timer = new Timer();
         ArrayList<ArrayList<String>> wszystkieProdukty = ladowanieDanych();
         ArrayList<String> kategorie = new ArrayList<>();
         for(ArrayList<String> kategoria: wszystkieProdukty){
@@ -509,14 +626,6 @@ public class Main {
         MainOkno.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         MainOkno.setSize(768, 798);
         MainOkno.setResizable(false);
-        JFrame MagazynOkno = new JFrame("Magazyn");
-        MagazynOkno.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        MagazynOkno.setSize(500,600);
-        MagazynOkno.setResizable(false);
-        JFrame SklepOkno = new JFrame("Sklep");
-        SklepOkno.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        SklepOkno.setSize(500,600);
-        SklepOkno.setResizable(false);
 
         JPanel gra = new JPanel() {
             public void paintComponent(Graphics g) {
@@ -530,76 +639,56 @@ public class Main {
         JScrollPane panelMagazyn = new JScrollPane();
         MainOkno.addKeyListener(
             new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent e) {
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_UP -> {
-                        gracz1.y -= gracz1.speed;
-                        if (!onPath(gracz1.x, gracz1.y)){
-                            gracz1.y += gracz1.speed;
-                        }
-                    }
-                    case KeyEvent.VK_DOWN -> {
-                        gracz1.y += gracz1.speed;
-                        if (!onPath(gracz1.x, gracz1.y)){
+                public void keyPressed(java.awt.event.KeyEvent e) {
+                    switch (e.getKeyCode()) {
+                        case KeyEvent.VK_UP -> {
                             gracz1.y -= gracz1.speed;
+                            if (!onPath(gracz1.x, gracz1.y)){
+                                gracz1.y += gracz1.speed;
+                            }
                         }
-                    }
-                    case KeyEvent.VK_LEFT -> {
-                        gracz1.x -= gracz1.speed;
-                        if (!onPath(gracz1.x, gracz1.y)){
-                            gracz1.x += gracz1.speed;
+                        case KeyEvent.VK_DOWN -> {
+                            gracz1.y += gracz1.speed;
+                            if (!onPath(gracz1.x, gracz1.y)){
+                                gracz1.y -= gracz1.speed;
+                            }
                         }
-                    }
-                    case KeyEvent.VK_RIGHT -> {
-                        gracz1.x += gracz1.speed;
-                        if (!onPath(gracz1.x, gracz1.y)){
+                        case KeyEvent.VK_LEFT -> {
                             gracz1.x -= gracz1.speed;
-                        }
-                    }
-                    case KeyEvent.VK_SPACE -> {
-                        boolean onSklep = false;
-                        boolean onMagazyn = false;
-                        Sklep currentSklep = null;
-                        Magazyn currentMagazyn = null;
-                        for(Sklep sklep: sklepy){
-                            if(sklep.isOnSklep(gracz1)){
-                                currentSklep = sklep;
-                                onSklep = true;
+                            if (!onPath(gracz1.x, gracz1.y)){
+                                gracz1.x += gracz1.speed;
                             }
                         }
-                        if (magazyn.isOnMagazyn(gracz1)){
-                            currentMagazyn = magazyn;
-                            onMagazyn = true;
+                        case KeyEvent.VK_RIGHT -> {
+                            gracz1.x += gracz1.speed;
+                            if (!onPath(gracz1.x, gracz1.y)){
+                                gracz1.x -= gracz1.speed;
+                            }
                         }
-                        if(onSklep){
-                            System.out.println("Jesteś w sklepie");
-                            SklepUI.otworzSklep(currentSklep,gracz1,MainOkno);
-                        }
-                        if(onMagazyn){
-                            System.out.println("Jesteś w magazynie");
-                            MagazynUI.otworzMagazyn(magazyn, gracz1, MainOkno);
-                            System.out.println("ZAWARTOSC MAGAZYNU:");
-                            for(ArrayList<String> kategoria: magazyn.inwentarzMagazyn){
-                                for (String s : kategoria) {
-                                    System.out.println(s);
+                        case KeyEvent.VK_SPACE -> {
+                            for(Sklep sklep: sklepy){
+                                if(sklep.isOnSklep(gracz1)){
+                                    SklepUI.otworzSklep(sklep,gracz1,MainOkno);
+                                    for(ArrayList<String> kategoria : sklep.inwentarzSklep){
+                                        System.out.println(kategoria);
+                                    }
                                 }
                             }
-                            System.out.println("PAKA GRACZA:");
-                            for(ArrayList<String> kategoria: gracz1.pakaKierowca){
-                                for (String s : kategoria) {
-                                    System.out.println(s);
-                                }
+                            if (magazyn.isOnMagazyn(gracz1)){
+                                MagazynUI.otworzMagazyn(magazyn, gracz1, MainOkno);
                             }
                         }
+                        case KeyEvent.VK_ESCAPE -> {
+                            EndGame.Zakoncz(MainOkno, sklepy, gracz1);
+                        }
                     }
+                    gra.repaint();
                 }
-                gra.repaint();
             }
-        }
         );
-        SklepOkno.add(panelSklepZapotrzebowanie);
         MainOkno.add(gra);
         MainOkno.setLocationRelativeTo(null);
         MainOkno.setVisible(true);
+        Rules.Zasady(MainOkno);
     }
 }
