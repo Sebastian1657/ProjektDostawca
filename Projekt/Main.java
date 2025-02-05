@@ -24,7 +24,7 @@ class Timer{
         this.minelo = System.currentTimeMillis() - this.czasStartu;
         this.mineloSekund = minelo / 1000;
         this.sekundy = (int)mineloSekund % 60;
-        this.mineloMinut = (int)mineloSekund / 60;
+        this.mineloMinut = (int)mineloSekund / 60;s
         if(mineloMinut < 1){
             this.mineloMinut = 0;
         }
@@ -270,13 +270,11 @@ class MagazynUI {
         magazynOkno.setSize(800, 600);
         magazynOkno.setLayout(new BorderLayout());
         magazynOkno.setResizable(false);
-
         //Tworzenie paneli magazynu i ekwipunku
         JPanel magazynLista = new JPanel();
         JPanel pakaLista = new JPanel();
         magazynLista.setLayout(new BoxLayout(magazynLista, BoxLayout.Y_AXIS));
         pakaLista.setLayout(new BoxLayout(pakaLista, BoxLayout.Y_AXIS));
-
         //Dodawanie elementów magazynu do panelu
         for (ArrayList<String> kategoria : magazyn.inwentarzMagazyn) {
             String nazwaKategorii = kategoria.getFirst();
@@ -394,7 +392,6 @@ class MagazynUI {
                     }
                 }
             }
-
             gracz.pakaKierowca.clear();
             for (Component komponent : pakaLista.getComponents()) {
                 if (komponent instanceof JCheckBox checkBox) {
@@ -425,7 +422,6 @@ class MagazynUI {
         przyciskiPanel.add(przeniesDoMagazynu);
         przyciskiPanel.add(zatwierdz);
         przyciskiPanel.add(Box.createVerticalGlue());
-
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
         scrollMagazyn.setPreferredSize(new Dimension(100, 200));
@@ -504,26 +500,23 @@ class Rules{
 
         tytul.setFont(new Font("Sans", Font.BOLD, 24));
         tytul.setAlignmentX(Component.CENTER_ALIGNMENT);
-
         opis.setFont(new Font("Sans", Font.PLAIN, 20));
         opis.setLineWrap(true);
         opis.setEditable(false);
-
         poruszanie.setFont(new Font("Sans", Font.PLAIN, 20));
         poruszanie.setAlignmentX(Component.CENTER_ALIGNMENT);
         poruszanie.setLayout(new BoxLayout(poruszanie, BoxLayout.Y_AXIS));
         poruszanie.setEditable(false);
-
         oknoZasady.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         oknoZasady.setSize(600, 500);
         oknoZasady.setLayout(new BorderLayout());
         oknoZasady.setResizable(false);
-
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.add(tytul);
         panel.add(opis);
         panel.add(poruszanie);
+
         oknoZasady.add(panel);
         oknoZasady.setLocationRelativeTo(parentFrame);
         oknoZasady.setVisible(true);
@@ -602,13 +595,13 @@ public class Main {
         int[][] droga = new int[][]{
                 {2*64,9*64,2*64}, {64,2*64,4*64}, {2*64,6*64,5*64},
                 {9*64,10*64,5*64}, {6*64,9*64,6*64}, {64,9*64,9*64},
-                {9*64,10*64,9*64},{2*64,11*64,2*64}, {2*64,6*64,6*64},
-                {8*64,9*64,6*64},{5*64,6*64,7*64}, {2*64,9*64,9*64}
+                {9*64,10*64,9*64}, {2*64,11*64,2*64}, {2*64,6*64,6*64},
+                {8*64,9*64,6*64}, {5*64,6*64,7*64}, {2*64,9*64,9*64}
         };
-        for(int i=0; i<7; i++){
+        for(int i=0; i<7; i++){//Sprawdzenie, czy gracz znajduje się na drogach poziomych
             if(kx >= droga[i][0] && kx <= droga[i][1] && ky == droga[i][2])return true;
         }
-        for(int i=6; i<12; i++){
+        for(int i=7; i<12; i++){//Sprawdzenie, czy gracz znajduje się na drogach pionowych
             if(ky >= droga[i][0] && ky <= droga[i][1] && kx == droga[i][2])return true;
         }
         return false;
@@ -634,9 +627,6 @@ public class Main {
                 g.drawImage(pojazd, gracz1.x, gracz1.y, this);
             }
         };
-        JPanel panelSklepZapotrzebowanie = new JPanel();
-        JScrollPane panelSklepInwentarz = new JScrollPane();
-        JScrollPane panelMagazyn = new JScrollPane();
         MainOkno.addKeyListener(
             new java.awt.event.KeyAdapter() {
                 public void keyPressed(java.awt.event.KeyEvent e) {
